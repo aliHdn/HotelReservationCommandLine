@@ -10,15 +10,42 @@ using HotelReservationChatBot.Models.Data_Models;
 using Microsoft.AspNet.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddIdentityCore<User>(options =>
 {
     // you can put lockout settings directly here instead of a separate Configure<> call
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.MaxFailedAccessAttempts = 2;
     options.Lockout.AllowedForNewUsers = true;
 })
+.AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<HotelDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Default SignIn settings.
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+});
+// using Microsoft.AspNetCore.Identity;
+
+builder.Services.Configure<PasswordHasherOptions>(option =>
+{
+    option.IterationCount = 12000;
+});
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Default Password settings.
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 0;
+    options.User.RequireUniqueEmail = true;
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
