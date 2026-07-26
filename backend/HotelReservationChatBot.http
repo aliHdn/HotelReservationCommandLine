@@ -1,6 +1,0 @@
-@HotelReservationChatBot_HostAddress = http://localhost:5147
-
-GET {{HotelReservationChatBot_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
