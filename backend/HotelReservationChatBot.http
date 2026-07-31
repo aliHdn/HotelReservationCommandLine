@@ -1,0 +1,6 @@
+@HotelReservationChatBot_HostAddress = http://localhost:7105
+
+GET {{HotelReservationChatBot_HostAddress}}/xsrf-token
+Accept: application/json
+
+###
