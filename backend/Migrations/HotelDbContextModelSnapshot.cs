@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HotelReservationChatBot.Migrations
+namespace HotelReservationCli.Migrations
 {
     [DbContext(typeof(HotelDbContext))]
     partial class HotelDbContextModelSnapshot : ModelSnapshot
@@ -22,25 +22,27 @@ namespace HotelReservationChatBot.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HotelReservationChatBot.Models.Data_Models.Room", b =>
+            modelBuilder.Entity("HotelReservationChatBot.Models.Data_Models.Reservations", b =>
                 {
-                    b.Property<int>("RoomId")
+                    b.Property<int>("ReservationsId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoomId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReservationsId"));
 
-                    b.Property<DateTime>("CheckIn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CheckOut")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("FloorNumber")
+                    b.Property<int>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberOfNights")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReservationStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReservedByEmail")
                         .IsRequired()
@@ -50,8 +52,51 @@ namespace HotelReservationChatBot.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("RoomPrice")
+                    b.Property<int>("RoomTypee")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<double>("TotalPrice")
                         .HasColumnType("float");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ReservationsId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reservations");
+                });
+
+            modelBuilder.Entity("HotelReservationChatBot.Models.Data_Models.Room", b =>
+                {
+                    b.Property<int>("RoomId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoomId"));
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FloorNumber")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RoomName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("RoomPricePerNight")
+                        .HasColumnType("float");
+
+                    b.Property<int>("RoomTypee")
+                        .HasColumnType("int");
 
                     b.HasKey("RoomId");
 
@@ -65,6 +110,9 @@ namespace HotelReservationChatBot.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<double>("Balance")
+                        .HasColumnType("float");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -264,6 +312,13 @@ namespace HotelReservationChatBot.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("HotelReservationChatBot.Models.Data_Models.Reservations", b =>
+                {
+                    b.HasOne("HotelReservationChatBot.Models.Data_Models.User", null)
+                        .WithMany("MyReservations")
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -313,6 +368,11 @@ namespace HotelReservationChatBot.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("HotelReservationChatBot.Models.Data_Models.User", b =>
+                {
+                    b.Navigation("MyReservations");
                 });
 #pragma warning restore 612, 618
         }

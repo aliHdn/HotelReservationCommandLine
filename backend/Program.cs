@@ -1,17 +1,17 @@
-using Google;
 using HotelReservationChatBot.Data;
 using HotelReservationChatBot.Models.Data_Models;
 using HotelReservationChatBot.Servcies.Implementation;
 using HotelReservationChatBot.Servcies.Interfaces;
+using HotelReservationCli.Servcies.Implementation;
+using HotelReservationCli.Servcies.Interfaces;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.AI;
 using Microsoft.IdentityModel.Tokens;
-using OllamaSharp;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,19 +19,7 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<HotelDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IChatClient>(sp =>
-{
-    // Point OllamaApiClient to your local Ollama server and target model
-    var ollamaClient = new OllamaApiClient(
-        uri: new Uri("http://localhost:11434"),
-        defaultModel: "llama3.2:3b"
-    );
 
-    // Build the execution pipeline with tool/function invocation enabled
-    return new ChatClientBuilder(ollamaClient)
-        .UseFunctionInvocation()
-        .Build();
-});
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddIdentityCore<User>(options =>
@@ -65,10 +53,18 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+      .AddJsonOptions(options =>
+      {
+          options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+      });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.UseInlineDefinitionsForEnums();
+});
 builder.Services.AddScoped<ITokenServices, TokenServices>();
+builder.Services.AddScoped<ICliServices, CliServices>();
 builder.Services.AddScoped<IHotelRepository, HotelRepository>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -185,8 +181,10 @@ using (var scope = app.Services.CreateScope())
             var newUser = new User
             {
                 UserName = u.Email,
+                FullName = u.Email,
                 Email = u.Email,
-                RoleType="Admin"
+                RoleType = "Admin",
+                Balance = 0
             };
 
             var result = await UserManager.CreateAsync(newUser, u.Password);

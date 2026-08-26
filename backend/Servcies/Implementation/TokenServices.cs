@@ -30,7 +30,9 @@ namespace HotelReservationChatBot.Servcies.Implementation
             //creating claims
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.PrimarySid,request.Email)
+                new Claim(ClaimTypes.NameIdentifier,user.Id),
+                new Claim(JwtRegisteredClaimNames.Sub,user.Id),
+                new Claim(ClaimTypes.PrimarySid,user.Id),
             };
 
             foreach (var role in userRole)
