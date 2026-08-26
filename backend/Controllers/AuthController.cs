@@ -86,7 +86,8 @@ namespace HotelReservationChatBot.Controllers
                 FullName = request.Name.Trim(),
                 NormalizedEmail = request.Email.Trim().ToUpperInvariant(),
                 NormalizedUserName = request.Name.Trim().ToUpperInvariant(),
-                RoleType = "Customer"
+                RoleType = "Customer",
+                Balance=0
             };
 
             var result = await UserManager.CreateAsync(user, request.Password);

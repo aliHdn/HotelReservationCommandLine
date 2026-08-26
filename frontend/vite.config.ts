@@ -14,3 +14,7 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
 });
+function tailwindcss(): import("vite").PluginOption {
+  throw new Error('Function not implemented.');
+}
+

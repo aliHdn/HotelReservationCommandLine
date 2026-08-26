@@ -1,28 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { demoReservations, demoUsers, uid } from '@/data/demo';
+import { uid } from '@/data/demo';
 import type { Reservation, User } from '@/types';
 
 interface StoreValue {
   // auth
   user: User | null;
   login: (email: string, role: string) => void;
-  xtoken: (token: string) => void;
+  xtoken: (token: string) => string;
   signup: (email: string, role: string) => { ok: boolean };
   logout: () => void;
-  // reservations
-  reservations: Reservation[];
-  addReservation: (r: Omit<Reservation, 'id' | 'createdAt'>) => Reservation;
-  updateReservationStatus: (id: string, status: Reservation['status']) => void;
-  // derived
-  myReservations: Reservation[];
+  token: string;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
 
 const LS_USER = 'aurelia.user';
 const LS_USERS = 'aurelia.users';
-const LS_RES = 'aurelia.reservations';
-const LS_PWD = 'aurelia.passwords';
 
 interface StoredUser extends User {
   password?: string;
@@ -48,18 +41,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(() => load<User | null>(LS_USER, null));
-  const [users, setUsers] = useState<StoredUser[]>(() => load<StoredUser[]>(LS_USERS, demoUsers));
-  const [passwords, setPasswords] = useState<Record<string, string>>(() =>
-    load<Record<string, string>>(LS_PWD, { 'admin@aurelia.com': 'admin123', 'guest@aurelia.com': 'guest123' })
-  );
-  const [reservations, setReservations] = useState<Reservation[]>(() =>
-    load<Reservation[]>(LS_RES, demoReservations)
-  );
+  const [users, setUsers] = useState<StoredUser[]>();
+
 
   useEffect(() => save(LS_USER, user), [user]);
   useEffect(() => save(LS_USERS, users), [users]);
-  useEffect(() => save(LS_RES, reservations), [reservations]);
-  useEffect(() => save(LS_PWD, passwords), [passwords]);
 
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
@@ -99,10 +85,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const storeXToken = useCallback<StoreValue['xtoken']>(
     (token) => {
       setToken(token);
+      return token;
     },
     [users]
   );
-
 
   const logout = useCallback(async () => {
 
@@ -132,24 +118,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [token]);
 
-  const addReservation = useCallback<StoreValue['addReservation']>((r) => {
-    const reservation: Reservation = { ...r, id: uid('res'), createdAt: new Date().toISOString() };
-    setReservations((prev) => [reservation, ...prev]);
-    return reservation;
-  }, []);
 
-  const updateReservationStatus = useCallback<StoreValue['updateReservationStatus']>((id, status) => {
-    setReservations((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-  }, []);
 
-  const myReservations = useMemo(
-    () => (user ? reservations.filter((r) => r.userId === user.id || r.userId === 'u-customer').filter((r, i, arr) => arr.findIndex((x) => x.id === r.id) === i) : []),
-    [reservations, user]
-  );
 
   const value = useMemo<StoreValue>(
-    () => ({ user, login, signup, logout, reservations, addReservation, updateReservationStatus, myReservations, xtoken: storeXToken }),
-    [user, login, signup, logout, reservations, addReservation, updateReservationStatus, myReservations, storeXToken]
+    () => ({ user, login, signup, logout, xtoken: storeXToken, token: token || '' }),
+    [user, login, signup, logout, storeXToken, token]
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

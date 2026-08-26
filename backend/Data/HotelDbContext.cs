@@ -12,6 +12,7 @@ namespace HotelReservationChatBot.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<Reservations> Reservations { get; set; }
     }
     
 }

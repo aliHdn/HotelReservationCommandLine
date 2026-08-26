@@ -7,9 +7,12 @@ namespace HotelReservationChatBot.Models.Data_Models
     {
         [PersonalData]
         [Required]
-        public string FullName { get; set; } = string.Empty;
+        public required string FullName { get; set; } = string.Empty;
         [PersonalData]
         [Required]
-        public string RoleType { get; set; } = string.Empty;
+        public required string RoleType { get; set; } = string.Empty;
+        public required double Balance { get; set; } = 0;
+
+        public List<Reservations> MyReservations { get; set; } = new List<Reservations>();
     }
 }
